@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}SobrioApp — Sua Jornada de Liberdade{% endblock %}
+
+{% block content %}
+<div class="landing">
+  <div class="landing-hero">
+    <div class="hero-icon">🌿</div>
+    <h1>SobrioApp</h1>
+    <p class="hero-subtitle">Sua jornada para a liberdade começa aqui</p>
+    <p class="hero-desc">Acompanhe sua sequência de dias limpos, ganhe conquistas e desafie seus amigos!</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="tabs">
+      <button class="tab{% if active_tab == 'login' %} active{% endif %}"
+              onclick="switchTab('login')">Entrar</button>
+      <button class="tab{% if active_tab == 'register' %} active{% endif %}"
+              onclick="switchTab('register')">Cadastrar</button>
+    </div>
+
+    <!-- Login -->
+    <div id="login-form" class="form-section{% if active_tab != 'login' %} hidden{% endif %}">
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+          <label>Usuário</label>
+          <input type="text" name="username" required placeholder="Seu usuário" />
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" name="password" required placeholder="Sua senha" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Entrar 🚀</button>
+      </form>
+      <p class="switch-hint">
+        Não tem conta?
+        <a href="#" onclick="switchTab('register')">Cadastre-se</a>
+      </p>
+    </div>
+
+    <!-- Register -->
+    <div id="register-form" class="form-section{% if active_tab != 'register' %} hidden{% endif %}">
+      <form method="POST" action="{{ url_for('register') }}">
+        <div class="form-group">
+          <label>Usuário</label>
+          <input type="text" name="username" required placeholder="Escolha um usuário" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="seu@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" name="password" required placeholder="Crie uma senha" minlength="6" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Começar Jornada 🌱</button>
+      </form>
+      <p class="switch-hint">
+        Já tem conta?
+        <a href="#" onclick="switchTab('login')">Entre aqui</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

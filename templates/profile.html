@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Perfil — SobrioApp{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+  <!-- ── Header ── -->
+  <div class="profile-header card">
+    <div class="avatar">{{ user.username[0].upper() }}</div>
+    <h2>{{ user.username }}</h2>
+    <p class="join-date">Membro desde {{ user.created_at.strftime('%d/%m/%Y') }}</p>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stats-grid">
+    <div class="stat-card card">
+      <div class="stat-number">{{ streak }}</div>
+      <div class="stat-label">🔥 Sequência atual</div>
+    </div>
+    <div class="stat-card card">
+      <div class="stat-number">{{ record }}</div>
+      <div class="stat-label">🏅 Recorde pessoal</div>
+    </div>
+    <div class="stat-card card">
+      <div class="stat-number">{{ clean_days }}</div>
+      <div class="stat-label">✅ Dias limpos</div>
+    </div>
+    <div class="stat-card card">
+      <div class="stat-number">{{ total_entries }}</div>
+      <div class="stat-label">📝 Registros totais</div>
+    </div>
+  </div>
+
+  <!-- ── All achievements ── -->
+  <div class="achievements card">
+    <h3>🏆 Todas as Conquistas</h3>
+    <div class="milestones-grid milestones-grid-lg">
+      {% for days in milestone_days %}
+      {% set earned = days in earned_milestone_days %}
+      <div class="milestone-badge {% if earned %}earned{% else %}locked{% endif %}">
+        <div class="badge-icon">{% if earned %}{{ milestone_info[days].icon }}{% else %}🔒{% endif %}</div>
+        <div class="badge-name">{{ milestone_info[days].name }}</div>
+        <div class="badge-days">{{ days }} dias</div>
+        {% if earned %}<div class="badge-check">✓</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Record history ── -->
+  {% if record_milestones %}
+  <div class="records-card card">
+    <h3>📊 Histórico de Recordes</h3>
+    {% for m in record_milestones | sort(attribute='days_count') %}
+    <div class="record-item">
+      <span class="record-days">{{ m.days_count }} {{ 'dia' if m.days_count == 1 else 'dias' }}</span>
+      <span class="record-date">{{ m.achieved_at.strftime('%d/%m/%Y') }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

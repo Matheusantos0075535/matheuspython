@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Início — SobrioApp{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- ── Streak hero ── -->
+  <div class="streak-hero card">
+    <div class="streak-display">
+      <span class="streak-flame{% if not checked_in_today or (today_entry and today_entry.smoked_today) %} inactive{% endif %}">
+        {% if checked_in_today and today_entry and not today_entry.smoked_today %}🔥{% else %}🩶{% endif %}
+      </span>
+      <div class="streak-number">{{ streak }}</div>
+      <div class="streak-label">
+        {{ 'dia' if streak == 1 else 'dias' }} sem fumar
+      </div>
+    </div>
+
+    {% if record > 0 %}
+    <div class="record-badge">
+      🏅 Recorde pessoal: <strong>{{ record }} {{ 'dia' if record == 1 else 'dias' }}</strong>
+      {% if streak >= record and streak > 0 and checked_in_today %}
+        <span class="new-record-pill">RECORDE! 🎉</span>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <p class="motivational">{{ motivational }}</p>
+  </div>
+
+  <!-- ── Check-in ── -->
+  <div class="checkin-card card">
+    {% if checked_in_today %}
+      {% if today_entry and today_entry.smoked_today %}
+        <h3>💭 Você registrou uma recaída hoje</h3>
+        <blockquote class="entry-quote">{{ today_entry.note }}</blockquote>
+        <p class="encouragement">Tudo bem. Amanhã é um novo começo — você consegue! 💪</p>
+      {% else %}
+        <h3>✅ Check-in feito hoje!</h3>
+        <blockquote class="entry-quote">{{ today_entry.note }}</blockquote>
+        <p class="encouragement">Volte amanhã para manter sua sequência!</p>
+      {% endif %}
+    {% else %}
+      <h3>📝 Como foi seu dia hoje?</h3>
+      <p class="checkin-subtitle">Registre seu progresso para manter a sequência</p>
+      <form method="POST" action="{{ url_for('checkin') }}" class="checkin-form">
+        <textarea name="note" rows="4"
+          placeholder="Conte como foi o seu dia sem fumar... O que você sentiu? O que ajudou? Como está se sentindo?"
+          required></textarea>
+
+        <div class="smoked-question">
+          <p>Você fumou hoje?</p>
+          <div class="radio-group">
+            <label class="radio-option clean" id="opt-clean">
+              <input type="radio" name="smoked" value="no" checked onchange="updateRadio(this)">
+              ✅ Não fumei!
+            </label>
+            <label class="radio-option relapse" id="opt-relapse">
+              <input type="radio" name="smoked" value="yes" onchange="updateRadio(this)">
+              😔 Tive uma recaída
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Registrar Dia 🌟</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <!-- ── Next milestone ── -->
+  {% if next_milestone %}
+  <div class="next-milestone card">
+    <h3>Próxima conquista</h3>
+    <div class="milestone-progress">
+      <div class="milestone-icon-lg">{{ milestone_info[next_milestone].icon }}</div>
+      <div class="milestone-details">
+        <div class="milestone-name">{{ milestone_info[next_milestone].name }}</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ next_milestone_progress }}%"></div>
+        </div>
+        <div class="progress-text">{{ streak }} / {{ next_milestone }} dias</div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="next-milestone card all-done">
+    <span style="font-size:2rem">👑</span>
+    <p>Você desbloqueou todas as conquistas! Lendário!</p>
+  </div>
+  {% endif %}
+
+  <!-- ── Milestone badges ── -->
+  <div class="milestones-section card">
+    <h3>🏆 Conquistas</h3>
+    <div class="milestones-grid">
+      {% for days in milestone_days %}
+      <div class="milestone-badge {% if days in earned_milestone_days %}earned{% else %}locked{% endif %}"
+           title="{{ milestone_info[days].desc }}">
+        <div class="badge-icon">
+          {% if days in earned_milestone_days %}{{ milestone_info[days].icon }}{% else %}🔒{% endif %}
+        </div>
+        <div class="badge-name">{{ milestone_info[days].name }}</div>
+        <div class="badge-days">{{ days }}d</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Recent entries ── -->
+  {% if recent_entries %}
+  <div class="recent-entries card">
+    <h3>📖 Últimos registros</h3>
+    {% for entry in recent_entries %}
+    <div class="entry-item {% if entry.smoked_today %}relapse{% else %}clean{% endif %}">
+      <div class="entry-meta">
+        <span class="entry-date">{{ entry.date.strftime('%d/%m/%Y') }}</span>
+        <span class="entry-status">
+          {% if entry.smoked_today %}😔 Recaída{% else %}✅ Limpo{% endif %}
+        </span>
+      </div>
+      <div class="entry-preview">{{ entry.note[:120] }}{% if entry.note|length > 120 %}…{% endif %}</div>
+    </div>
+    {% endfor %}
+    <a href="{{ url_for('history') }}" class="view-all-link">Ver histórico completo →</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
