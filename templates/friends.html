@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Amigos — SobrioApp{% endblock %}
+
+{% block content %}
+<div class="friends-page">
+  <h2>👥 Amigos &amp; Desafios</h2>
+
+  <!-- ── Add friend ── -->
+  <div class="add-friend card">
+    <h3>Adicionar Amigo</h3>
+    <form method="POST" action="{{ url_for('add_friend') }}" class="add-friend-form">
+      <input type="text" name="username" placeholder="Nome de usuário do amigo" required />
+      <button type="submit" class="btn btn-primary">Enviar convite 📨</button>
+    </form>
+  </div>
+
+  <!-- ── Pending received ── -->
+  {% if pending_received %}
+  <div class="pending-requests card">
+    <h3>Solicitações recebidas ({{ pending_received|length }})</h3>
+    {% for item in pending_received %}
+    <div class="friend-request">
+      <div class="fr-info">
+        <span class="fr-avatar">{{ item.sender.username[0].upper() }}</span>
+        <span><strong>{{ item.sender.username }}</strong> quer ser seu amigo!</span>
+      </div>
+      <div class="request-actions">
+        <a href="{{ url_for('accept_friend', friendship_id=item.request.id) }}"
+           class="btn btn-small btn-success">✅ Aceitar</a>
+        <a href="{{ url_for('reject_friend', friendship_id=item.request.id) }}"
+           class="btn btn-small btn-danger">❌ Recusar</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Pending sent ── -->
+  {% if pending_sent %}
+  <div class="pending-sent card">
+    <h3>Aguardando resposta ({{ pending_sent|length }})</h3>
+    {% for item in pending_sent %}
+    <div class="pending-sent-item">
+      <span class="fr-avatar">{{ item.receiver.username[0].upper() }}</span>
+      <span>{{ item.receiver.username }}</span>
+      <span class="pending-pill">Pendente…</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Leaderboard ── -->
+  <div class="leaderboard card">
+    <h3>🏆 Placar</h3>
+    {% if leaderboard|length <= 1 %}
+    <p class="empty-hint">Adicione amigos para ver o placar!</p>
+    {% endif %}
+    {% for item in leaderboard %}
+    <div class="leaderboard-item {% if item.get('is_self') %}self{% endif %}">
+      <div class="rank">
+        {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+      </div>
+      <div class="player-info">
+        <span class="player-name">{{ item.user.username }}</span>
+        {% if item.get('is_self') %}<span class="you-badge">Você</span>{% endif %}
+      </div>
+      <div class="player-streak">
+        {% if item.streak > 0 %}🔥{% else %}💤{% endif %}
+        {{ item.streak }} dias
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── Active challenges ── -->
+  {% if challenges %}
+  <div class="challenges card">
+    <h3>⚔️ Desafios Ativos</h3>
+    {% for item in challenges %}
+    <div class="challenge-item">
+      <div class="challenge-avatars">
+        <span class="fr-avatar">{{ user.username[0].upper() }}</span>
+        <span class="vs-label">vs</span>
+        <span class="fr-avatar opp">{{ item.opponent.username[0].upper() }}</span>
+      </div>
+      <div class="challenge-info">
+        <div class="challenge-names">
+          <strong>Você</strong> vs <strong>{{ item.opponent.username }}</strong>
+        </div>
+        <div class="challenge-streaks">
+          <span class="cs-me">🔥 {{ item.my_streak }}d</span>
+          <span class="cs-sep">|</span>
+          <span class="cs-opp">🔥 {{ item.opponent_streak }}d</span>
+        </div>
+        <div class="challenge-since">Desde {{ item.challenge.start_date.strftime('%d/%m/%Y') }}</div>
+      </div>
+      <a href="{{ url_for('cancel_challenge', challenge_id=item.challenge.id) }}"
+         class="btn btn-small btn-danger"
+         onclick="return confirm('Cancelar desafio?')">✕</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Friends list ── -->
+  {% if friends_data %}
+  <div class="friends-list card">
+    <h3>Seus Amigos</h3>
+    {% for fd in friends_data %}
+    <div class="friend-item">
+      <div class="friend-avatar">{{ fd.user.username[0].upper() }}</div>
+      <div class="friend-info">
+        <div class="friend-name">{{ fd.user.username }}</div>
+        <div class="friend-stats">🔥 {{ fd.streak }} dias &nbsp;|&nbsp; 🏅 Recorde: {{ fd.record }}</div>
+      </div>
+      <form method="POST" action="{{ url_for('create_challenge', friend_id=fd.user.id) }}">
+        <button type="submit" class="btn btn-small btn-challenge">⚔️ Desafiar</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-friends card">
+    <p>Você ainda não tem amigos. Adicione alguém para ver o placar! 👆</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Histórico — SobrioApp{% endblock %}
+
+{% block content %}
+<div class="history-page">
+  <h2>📅 Seu Histórico</h2>
+
+  {% if entries %}
+    <p class="history-count">{{ entries|length }} registro{{ 's' if entries|length != 1 }}</p>
+    <div class="entries-list">
+      {% for entry in entries %}
+      <div class="history-entry card {% if entry.smoked_today %}relapse{% else %}clean{% endif %}">
+        <div class="history-entry-header">
+          <span class="entry-date-lg">{{ entry.date.strftime('%d/%m/%Y') }}</span>
+          <span class="entry-status-badge">
+            {% if entry.smoked_today %}😔 Recaída{% else %}✅ Dia limpo{% endif %}
+          </span>
+        </div>
+        <p class="entry-note-full">{{ entry.note }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state card">
+      <p>Você ainda não tem registros. Comece o check-in hoje! 🌱</p>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Fazer Check-in</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
